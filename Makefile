@@ -7,5 +7,5 @@ demo: demo.cpp options.cpp
 	$(GCC) $^ -o $@ $(INC)
 	
 .PHONY : clean
-clean :
--rm demo
+clean:
+	rm demo
