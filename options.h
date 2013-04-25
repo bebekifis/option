@@ -38,14 +38,18 @@ using namespace std;
 
 class Option
 {
+    protected:
+        map<string, string> _op;
     public:
-        map<string, string> opt;
         Option();
         ~Option();
+        Option(int, string opts[][2]);
         void regist(string key, string val);
         void parseOption(int argc, char ** argv);
         void print();
         void usage(char *);
+        void clearemptyop();
+        string & operator [] (string);
 };
 #endif    // #ifndef __OPTIONS_H__
 

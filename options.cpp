@@ -22,7 +22,7 @@
  * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  * Author: Yinan Yu
  * Time: Feb/15/2013
  * Email: bebekifis@gmail.com
@@ -30,14 +30,22 @@
  * Description:
  */
 #include <stdlib.h>
-#include "options.h"
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
+#include "options.h"
+#include "util.h"
 
 Option::Option()
 {
-    
+}
+
+Option::Option(int nopt, string opts[][2])
+{
+    for (int i = 0; i < nopt; i++)
+    {
+        regist(string(opts[i][0]), string(opts[i][1]));
+    }
 }
 
 Option::~Option()
@@ -47,6 +55,7 @@ Option::~Option()
 
 void Option::parseOption(int argc, char ** argv)
 {
+    //map<string, string>::iterator it;
     for (int i = 1; i < argc; i++)
     {
         char * str = argv[i];
@@ -63,7 +72,7 @@ void Option::parseOption(int argc, char ** argv)
         string key = string(p ? p : "");
         p = strtok(NULL, "");
         string val = string(p ? p : "");
-        if (opt.find(key) == opt.end() || val.empty())
+        if (_op.find(key) == _op.end() || val.empty())
         {
             fprintf(stderr, "error: unknow option %s\n", bak.c_str());
             usage(argv[0]);
@@ -71,28 +80,49 @@ void Option::parseOption(int argc, char ** argv)
         }
         else
         {
-            opt[key] = val;
+            _op[key] = val;
         }
     }
 }
 
 void Option::regist(string key, string val)
 {
-    assert(!key.empty());
-    assert(!val.empty());
-    opt[key] = val;
+    fassert(!key.empty(), "key=%s, val=%s\n", key.c_str(), val.c_str());
+    fassert(!val.empty(), "key=%s, val=%s\n", key.c_str(), val.c_str());
+    _op[key] = val;
 }
 
 void Option::print()
 {
     fprintf(stderr, "options:\n");
-    for (map<string,string>::iterator it = opt.begin(); it != opt.end();it++)
+    for (map<string,string>::iterator it = _op.begin(); it != _op.end();it++)
     {
-        fprintf(stderr, "%s:\t%s\n", it->first.c_str(), it->second.c_str());
+        fprintf(stderr, "%15s: %s\n", it->first.c_str(), it->second.c_str());
     }
 }
 
 void Option::usage(char * exename)
 {
     fprintf(stderr, "Usage: %s --key=val\n", exename);
+}
+
+string & Option::operator [] (string key)
+{
+    return _op[key];
+}
+
+void Option::clearemptyop()
+{
+    map<string, string>::iterator it = _op.begin();
+    for (;it != _op.end();)
+    {
+        if (it->second.empty())
+        {
+            _op.erase(it++);
+        }
+        else
+        {
+            ++it;
+        }
+    }
 }
